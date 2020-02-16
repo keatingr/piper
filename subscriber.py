@@ -2,8 +2,7 @@ import cv2
 import numpy as np
 import redis
 import tensorflow as tf
-
-from utilities import from_redis
+from utilities import from_redis, to_redis
 
 
 def main():
@@ -40,7 +39,6 @@ def main():
 
         img = np.squeeze(img)
         vid.append(cv2.resize(img, (IMG_HEIGHT, IMG_WIDTH)))
-        p_label = ''
 
         if len(vid) == FRAME_BATCH_LEN:
             X = vid - mean_cube  # TODO mean avg is very important!
@@ -49,20 +47,24 @@ def main():
             confidence = max(p[0])
             if confidence > 0.2:  # re-label only if thresh
                 p_label = '{:.5f} - {}'.format(max(p[0]), labels[int(np.argmax(p[0]))])
+                data = {"timestamp": item[0], "prediction": p_label}
+                r.xadd('infstream', data)
             vid.pop(0)
 
         img = img / 255
 
-        if p_label:
-            cv2.putText(img, p_label, (11, 21), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 0, 0), 1)
-            cv2.putText(img, p_label, (10, 20), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 100, 0), 1)
 
-        cv2.imshow('Sporty', img)
-        # cv2.moveWindow('Sporty', 300, 150)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # if p_label:
+        #     cv2.putText(img, p_label, (11, 21), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 0, 0), 1)
+        #     cv2.putText(img, p_label, (10, 20), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 100, 0), 1)
+        #
+        # cv2.imshow('Sporty', img)
+        # # cv2.moveWindow('Sporty', 300, 150)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 
 
 if __name__ == '__main__':
-    r = redis.Redis(host='localhost', port=6379, db=0)
+    # r = redis.Redis(host='localhost', port=6379, db=0)
+    r = redis.Redis('trex')
     main()
