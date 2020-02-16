@@ -2,4 +2,4 @@ redis
 numpy
 keras
 pillow
-struct
+opencv-python==4.1.2.30
