@@ -22,16 +22,15 @@ def main():
     mean_cube = np.load('models/train01_16_128_171_mean.npy')
     mean_cube = np.transpose(mean_cube, (1, 2, 3, 0))
 
-    read_samples = r.xread({'vidstream': b'10-0'})  # number of messages and block count in ms
+    read_samples = r.xread({'vidstream': b'0-0'})  # number of messages and block count in ms
     # print(read_samples)
 
     vid = []
-    for k, item in enumerate(read_samples[0][1]):  # TODO make more readable and/or refactor for more robust logic
+    for k, item in enumerate(read_samples[0][1]):  # format is tuple of bytes (timestamp, frame data dict) (b'1581893417647-0', {b'frame':b'\x00...blah}
         try:
             img = from_redis(item[1][b'frame'])
         except Exception as e:
-            if 'not subscriptable' in str(
-                    e):  # TODO figure this out and handle all gracefully the initialization error is for a reason
+            if 'not subscriptable' in str(e):  # TODO figure this out and handle all gracefully the initialization error is for a reason
                 pass
             else:
                 print("error when calling from_redis(), printing raw item from channel")
