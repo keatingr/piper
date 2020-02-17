@@ -47,7 +47,7 @@ def main():
             confidence = max(p[0])
             if confidence > 0.2:  # re-label only if thresh
                 p_label = '{:.5f} - {}'.format(max(p[0]), labels[int(np.argmax(p[0]))])
-                data = {"timestamp": item[0], "prediction": p_label}
+                data = {item[0]: p_label}
                 r.xadd('infstream', data)
             vid.pop(0)
 
