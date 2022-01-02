@@ -1,0 +1,19 @@
+version: '3'
+services:
+    redis:
+        container_name: redis
+        image: redis
+        build:
+          context: .
+          dockerfile: Dockerfile-redis
+        ports:
+          - "6379:6379"
+        hostname: celerybroker
+        networks:
+          - pipernet
+        user: root
+        stdin_open: true
+        tty: true
+
+networks:
+    pipernet:
